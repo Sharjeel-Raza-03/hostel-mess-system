@@ -141,7 +141,8 @@
                   "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
                   "const j = pm.response.json();",
                   "pm.test(\"Role is STUDENT\", function () { pm.expect(j.role).to.eql(\"STUDENT\"); });",
-                  "pm.environment.set(\"studentToken\", j.token);"
+                  "pm.environment.set(\"studentToken\", j.token);",
+                  "pm.environment.set(\"studentId\", j.userId);"
                 ]
               }
             }
@@ -1572,6 +1573,790 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 Billing and leave approval (Step 5)",
+      "item": [
+        {
+          "name": "50 Set rates 80 / 150 / 150 and threshold 10",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/settings/rates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"breakfastRate\":80,\"lunchRate\":150,\"dinnerRate\":150,\"lowStockThreshold\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Sets known rates so the bill amounts in the next tests can be checked exactly."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Rates saved\", function () { pm.expect(j.breakfastRate).to.eql(80); pm.expect(j.lunchRate).to.eql(150); pm.expect(j.dinnerRate).to.eql(150); pm.expect(j.lowStockThreshold).to.eql(10); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "51 Get current rates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/settings/rates",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has all values\", function () { pm.expect(j.breakfastRate).to.be.a(\"number\"); pm.expect(j.lowStockThreshold).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "52 Negative rate (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/settings/rates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lunchRate\":-5}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "53 Student changes rates (403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/settings/rates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lunchRate\":100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "54 Student meals, demo day 1 (all 3 meals)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/meals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"mealDate\":\"{{billDay1}}\",\"breakfast\":true,\"lunch\":true,\"dinner\":true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Generates three demo dates in one future month, then adds all meals for day 1."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var d=new Date();d.setUTCDate(d.getUTCDate()+300+Math.floor(Math.random()*300));",
+                  "if(d.getUTCDate()>26){d.setUTCDate(d.getUTCDate()+6);}",
+                  "function iso(x){return x.toISOString().slice(0,10);}",
+                  "var d2=new Date(d.getTime()+86400000), d3=new Date(d.getTime()+2*86400000);",
+                  "pm.environment.set(\"billDay1\",iso(d));",
+                  "pm.environment.set(\"billDay2\",iso(d2));",
+                  "pm.environment.set(\"billDay3\",iso(d3));",
+                  "pm.environment.set(\"billMonth\",String(d.getUTCMonth()+1));",
+                  "pm.environment.set(\"billYear\",String(d.getUTCFullYear()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "55 Student meals, demo day 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/meals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"mealDate\":\"{{billDay2}}\",\"breakfast\":true,\"lunch\":true,\"dinner\":true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "56 Student meals, demo day 3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/meals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"mealDate\":\"{{billDay3}}\",\"breakfast\":true,\"lunch\":true,\"dinner\":true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "57 Admin generates bills (BEFORE leave)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/bills/generate?month={{billMonth}}&year={{billYear}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "const mine = j.find(function (b) { return b.userId === parseInt(pm.environment.get(\"studentId\"), 10); });",
+                  "pm.test(\"Student bill found\", function () { pm.expect(mine).to.not.be.undefined; });",
+                  "pm.test(\"9 meals counted\", function () { pm.expect(mine.totalMeals).to.eql(9); });",
+                  "pm.test(\"Amount is 1140 (3 days x 380)\", function () { pm.expect(mine.totalAmount).to.eql(1140); });",
+                  "pm.environment.set(\"billBefore\", mine.totalAmount);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "58 Student sees own bill (BEFORE leave)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/bills/my",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "const mine = j.find(function (b) { return b.billMonth === parseInt(pm.environment.get(\"billMonth\"), 10) && b.billYear === parseInt(pm.environment.get(\"billYear\"), 10); });",
+                  "pm.test(\"Student bill found\", function () { pm.expect(mine).to.not.be.undefined; });",
+                  "pm.test(\"Amount is 1140\", function () { pm.expect(mine.totalAmount).to.eql(1140); });",
+                  "pm.test(\"No leave days\", function () { pm.expect(mine.leaveDays).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "59 Student submits leave for day 2 and 3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fromDate\":\"{{billDay2}}\",\"toDate\":\"{{billDay3}}\",\"reason\":\"Bill demo leave\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "If this returns 409, a leave from an earlier run overlaps. Run this folder again."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"leaveId3\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "60 Admin approves the leave",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/leaves/{{leaveId3}}/approve",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Status is APPROVED\", function () { pm.expect(j.status).to.eql(\"APPROVED\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "61 Student sees own bill (AFTER leave, must drop)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/bills/my",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "const mine = j.find(function (b) { return b.billMonth === parseInt(pm.environment.get(\"billMonth\"), 10) && b.billYear === parseInt(pm.environment.get(\"billYear\"), 10); });",
+                  "pm.test(\"Student bill found\", function () { pm.expect(mine).to.not.be.undefined; });",
+                  "pm.test(\"Amount dropped to 380\", function () { pm.expect(mine.totalAmount).to.eql(380); });",
+                  "pm.test(\"3 meals counted\", function () { pm.expect(mine.totalMeals).to.eql(3); });",
+                  "pm.test(\"2 leave days\", function () { pm.expect(mine.leaveDays).to.eql(2); });",
+                  "pm.test(\"Bill is lower than before\", function () { pm.expect(mine.totalAmount).to.be.below(parseFloat(pm.environment.get(\"billBefore\"))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "62 Mess count day 1 is unchanged",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/mess-count?date={{billDay1}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"1 breakfast, 1 lunch, 1 dinner\", function () { pm.expect(j.breakfastCount).to.eql(1); pm.expect(j.lunchCount).to.eql(1); pm.expect(j.dinnerCount).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "63 Mess count day 2 dropped to 0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/mess-count?date={{billDay2}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"All counts are 0\", function () { pm.expect(j.breakfastCount).to.eql(0); pm.expect(j.lunchCount).to.eql(0); pm.expect(j.dinnerCount).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "64 Student edits a meal on leave day (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/meals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"mealDate\":\"{{billDay2}}\",\"breakfast\":true,\"lunch\":false,\"dinner\":false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "65 Admin lists bills for the month",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/bills?month={{billMonth}}&year={{billYear}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "const mine = j.find(function (b) { return b.userId === parseInt(pm.environment.get(\"studentId\"), 10); });",
+                  "pm.test(\"Student bill found\", function () { pm.expect(mine).to.not.be.undefined; });",
+                  "pm.test(\"Amount is 380\", function () { pm.expect(mine.totalAmount).to.eql(380); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "66 Monthly report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/reports/monthly?month={{billMonth}}&year={{billYear}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Report totals\", function () { pm.expect(j.studentsBilled).to.be.at.least(1); pm.expect(j.totalMeals).to.be.at.least(3); pm.expect(j.totalLeaveDays).to.be.at.least(2); pm.expect(j.totalRevenue).to.be.at.least(380); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "67 Generate again, still one bill per student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/bills/generate?month={{billMonth}}&year={{billYear}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Student appears once\", function () { var id = parseInt(pm.environment.get(\"studentId\"), 10); pm.expect(j.filter(function (b) { return b.userId === id; }).length).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "68 Invalid month (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/bills/generate?month=13&year=2026",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "69 Student generates bills (403)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/bills/generate?month=1&year=2027",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "70 Admin opens student bills endpoint (403)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/bills/my",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", function () { pm.response.to.have.status(403); });"
                 ]
               }
             }

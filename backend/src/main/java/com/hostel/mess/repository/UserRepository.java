@@ -1,8 +1,10 @@
 package com.hostel.mess.repository;
 
+import com.hostel.mess.model.Role;
 import com.hostel.mess.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -10,4 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    List<User> findByRoleOrderByFullName(Role role);
 }
