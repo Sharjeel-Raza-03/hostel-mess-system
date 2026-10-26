@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medicines - Hostel Mess System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="guard">
+  <header class="topbar">
+    <span class="brand">Hostel Mess System</span>
+    <nav>
+      <a id="backLink" href="index.html">Dashboard</a>
+      <a id="manageLink" href="admin-medicines.html" hidden>Manage stock</a>
+    </nav>
+    <div class="user">
+      <span id="navName"></span>
+      <button type="button" id="logoutBtn" class="btn btn-small btn-outline">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Hostel medicines</h2>
+      <div id="medMsg" class="message" hidden></div>
+      <form id="searchForm" class="row-fields">
+        <label>Search by name
+          <input type="text" id="search" placeholder="For example: paracetamol" autocomplete="off">
+        </label>
+        <label>Category
+          <select id="category"><option value="">All categories</option></select>
+        </label>
+        <label class="checks"><span><input type="checkbox" id="availableOnly"> Available only</span></label>
+      </form>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Medicine</th><th>Category</th><th>Quantity</th><th>Expiry date</th><th>Status</th></tr></thead>
+          <tbody id="medsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/medicines.js"></script>
+</body>
+</html>

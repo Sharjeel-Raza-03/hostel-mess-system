@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register - Hostel Mess System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+  <main class="card auth-card">
+    <h1>Create student account</h1>
+    <p class="muted">Admin accounts are created by the hostel office.</p>
+    <div id="regMsg" class="message" hidden></div>
+    <form id="regForm" novalidate>
+      <label>Full name
+        <input type="text" id="fullName" maxlength="100" autocomplete="name" required>
+      </label>
+      <label>Room number
+        <input type="text" id="roomNo" maxlength="20" required>
+      </label>
+      <label>Email
+        <input type="email" id="email" maxlength="100" autocomplete="username" required>
+      </label>
+      <label>Password (at least 8 characters)
+        <input type="password" id="password" minlength="8" maxlength="72" autocomplete="new-password" required>
+      </label>
+      <label>Confirm password
+        <input type="password" id="password2" maxlength="72" autocomplete="new-password" required>
+      </label>
+      <button type="submit" id="regBtn" class="btn btn-primary btn-block">Register</button>
+    </form>
+    <p class="center small">Already registered? <a href="index.html">Log in</a></p>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    "use strict";
+    UI.$("regForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      UI.clearMessage("regMsg");
+      const fullName = UI.$("fullName").value;
+      const roomNo = UI.$("roomNo").value;
+      const email = UI.$("email").value;
+      const password = UI.$("password").value;
+
+      if (!fullName.trim() || !roomNo.trim() || !email.trim()) {
+        UI.showMessage("regMsg", "Fill in every field.", "error");
+        return;
+      }
+      if (password.length < 8) {
+        UI.showMessage("regMsg", "The password must have at least 8 characters.", "error");
+        return;
+      }
+      if (password !== UI.$("password2").value) {
+        UI.showMessage("regMsg", "The two passwords do not match.", "error");
+        return;
+      }
+
+      const button = UI.$("regBtn");
+      button.disabled = true;
+      try {
+        await Auth.register(fullName, roomNo, email, password);
+        window.location.href = "index.html?registered=1";
+      } catch (err) {
+        UI.showMessage("regMsg", err.message, "error");
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

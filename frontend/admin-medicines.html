@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage medicines - Hostel Mess System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="guard">
+  <header class="topbar">
+    <span class="brand">Hostel Mess System (Admin)</span>
+    <nav>
+      <a href="admin-dashboard.html">Admin dashboard</a>
+      <a href="medicines.html">Medicine list</a>
+    </nav>
+    <div class="user">
+      <span id="navName"></span>
+      <button type="button" id="logoutBtn" class="btn btn-small btn-outline">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2 id="formTitle">Add a medicine</h2>
+      <div id="formMsg" class="message" hidden></div>
+      <form id="medForm" novalidate>
+        <input type="hidden" id="medId">
+        <div class="row-fields">
+          <label>Name <input type="text" id="medName" maxlength="100" required></label>
+          <label>Category
+            <input type="text" id="medCategory" maxlength="50" list="categoryList" placeholder="For example: Fever">
+            <datalist id="categoryList"></datalist>
+          </label>
+        </div>
+        <label>Description (optional)
+          <input type="text" id="medDescription" maxlength="255">
+        </label>
+        <div class="row-fields">
+          <label>Quantity <input type="number" id="medQuantity" min="0" step="1" required></label>
+          <label>Unit <input type="text" id="medUnit" maxlength="20" placeholder="tablets, strips, bottles"></label>
+          <label>Expiry date <input type="date" id="medExpiry" required></label>
+        </div>
+        <div class="actions">
+          <button type="submit" id="saveBtn" class="btn btn-primary">Add medicine</button>
+          <button type="button" id="cancelEditBtn" class="btn btn-outline" hidden>Cancel edit</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Medicine inventory</h2>
+      <div id="tableMsg" class="message" hidden></div>
+      <div class="row-fields">
+        <label>Search by name
+          <input type="text" id="search" placeholder="Type to filter" autocomplete="off">
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Expiry date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="medsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Alerts</h2>
+      <p class="muted small">Low stock, out of stock and expired medicines.</p>
+      <div id="alertMsg" class="message" hidden></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Medicine</th><th>Quantity</th><th>Expiry date</th><th>Status</th></tr></thead>
+          <tbody id="alertsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-medicines.js"></script>
+</body>
+</html>

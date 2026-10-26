@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My dashboard - Hostel Mess System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="guard">
+  <header class="topbar">
+    <span class="brand">Hostel Mess System</span>
+    <nav>
+      <a href="#meals">Meals</a>
+      <a href="#leave">Leave</a>
+      <a href="#bills">Bills</a>
+      <a href="medicines.html">Medicines</a>
+    </nav>
+    <div class="user">
+      <span id="navName"></span>
+      <button type="button" id="logoutBtn" class="btn btn-small btn-outline">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="meals" class="card">
+      <h2>My meals</h2>
+      <div id="mealMsg" class="message" hidden></div>
+      <form id="mealForm">
+        <div class="row-fields">
+          <label>Date
+            <input type="date" id="mealDate" required>
+          </label>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="mealBreakfast"> Breakfast</label>
+          <label><input type="checkbox" id="mealLunch"> Lunch</label>
+          <label><input type="checkbox" id="mealDinner"> Dinner</label>
+        </div>
+        <button type="submit" id="mealSaveBtn" class="btn btn-primary">Save meals</button>
+      </form>
+
+      <h3>Meal history</h3>
+      <div class="row-fields">
+        <label>Month <select id="mealMonth"></select></label>
+        <label>Year <input type="number" id="mealYear" min="2000" max="2100"></label>
+        <button type="button" id="mealLoadBtn" class="btn btn-outline">Show</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Status</th></tr></thead>
+          <tbody id="mealsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="leave" class="card">
+      <h2>Leave</h2>
+      <p class="muted small">Approved leave removes your meals for those days and lowers your bill automatically.</p>
+      <div id="leaveMsg" class="message" hidden></div>
+      <form id="leaveForm">
+        <div class="row-fields">
+          <label>From <input type="date" id="leaveFrom" required></label>
+          <label>To <input type="date" id="leaveTo" required></label>
+        </div>
+        <label>Reason
+          <input type="text" id="leaveReason" maxlength="255" required>
+        </label>
+        <button type="submit" id="leaveSaveBtn" class="btn btn-primary">Submit leave request</button>
+      </form>
+
+      <h3>My leave requests</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Admin remark</th></tr></thead>
+          <tbody id="leavesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="bills" class="card">
+      <h2>My bills</h2>
+      <div id="billMsg" class="message" hidden></div>
+      <div class="row-fields">
+        <button type="button" id="billsReloadBtn" class="btn btn-outline">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Month</th><th>Meals</th><th>Leave days</th><th>Avg rate</th><th>Total</th><th>Generated</th></tr></thead>
+          <tbody id="billsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Hostel medicines</h2>
+      <p class="muted">Check which medicines are available in the hostel.</p>
+      <a class="btn btn-primary" href="medicines.html">Open medicine list</a>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/student.js"></script>
+</body>
+</html>

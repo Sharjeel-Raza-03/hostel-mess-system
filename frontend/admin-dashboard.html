@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin dashboard - Hostel Mess System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="guard">
+  <header class="topbar">
+    <span class="brand">Hostel Mess System (Admin)</span>
+    <nav>
+      <a href="#leaves">Leave requests</a>
+      <a href="#count">Mess count</a>
+      <a href="#billing">Bills and report</a>
+      <a href="#settings">Rates</a>
+      <a href="#alerts">Medicine alerts</a>
+      <a href="medicines.html">Medicines</a>
+      <a href="admin-medicines.html">Manage stock</a>
+    </nav>
+    <div class="user">
+      <span id="navName"></span>
+      <button type="button" id="logoutBtn" class="btn btn-small btn-outline">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="leaves" class="card">
+      <h2>Leave requests</h2>
+      <div id="leaveMsg" class="message" hidden></div>
+      <div class="row-fields">
+        <label>Show
+          <select id="leaveFilter">
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+            <option value="ALL">All</option>
+          </select>
+        </label>
+        <button type="button" id="leaveReloadBtn" class="btn btn-outline">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Dates</th><th>Reason</th><th>Status</th><th>Review</th></tr></thead>
+          <tbody id="leavesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="count" class="card">
+      <h2>Daily mess count</h2>
+      <div id="countMsg" class="message" hidden></div>
+      <div class="row-fields">
+        <label>Date <input type="date" id="countDate"></label>
+        <button type="button" id="countLoadBtn" class="btn btn-outline">Load</button>
+      </div>
+      <div class="grid grid-3-always">
+        <div class="stat"><div class="value" id="countBreakfast">0</div><div class="label">Breakfasts</div></div>
+        <div class="stat"><div class="value" id="countLunch">0</div><div class="label">Lunches</div></div>
+        <div class="stat"><div class="value" id="countDinner">0</div><div class="label">Dinners</div></div>
+      </div>
+      <h3>Meals by student</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Room</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Status</th></tr></thead>
+          <tbody id="mealsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="billing" class="card">
+      <h2>Bills and monthly report</h2>
+      <div id="billMsg" class="message" hidden></div>
+      <div class="row-fields">
+        <label>Month <select id="billMonth"></select></label>
+        <label>Year <input type="number" id="billYear" min="2000" max="2100"></label>
+        <button type="button" id="billGenerateBtn" class="btn btn-primary">Generate bills</button>
+        <button type="button" id="billLoadBtn" class="btn btn-outline">Show bills</button>
+      </div>
+      <div class="grid grid-4">
+        <div class="stat"><div class="value" id="reportStudents">0</div><div class="label">Students billed</div></div>
+        <div class="stat"><div class="value" id="reportMeals">0</div><div class="label">Meals</div></div>
+        <div class="stat"><div class="value" id="reportLeave">0</div><div class="label">Leave days</div></div>
+        <div class="stat"><div class="value" id="reportRevenue">0.00</div><div class="label">Revenue</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Room</th><th>Meals</th><th>Leave days</th><th>Avg rate</th><th>Total</th></tr></thead>
+          <tbody id="billsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="settings" class="card">
+      <h2>Meal rates and low-stock threshold</h2>
+      <div id="rateMsg" class="message" hidden></div>
+      <form id="rateForm">
+        <div class="row-fields">
+          <label>Breakfast rate <input type="number" id="rateBreakfast" min="0" step="0.01" required></label>
+          <label>Lunch rate <input type="number" id="rateLunch" min="0" step="0.01" required></label>
+          <label>Dinner rate <input type="number" id="rateDinner" min="0" step="0.01" required></label>
+          <label>Low-stock threshold <input type="number" id="rateThreshold" min="0" step="1" required></label>
+        </div>
+        <button type="submit" id="rateSaveBtn" class="btn btn-primary">Save settings</button>
+      </form>
+    </section>
+
+    <section id="alerts" class="card">
+      <h2>Medicine alerts</h2>
+      <div id="alertMsg" class="message" hidden></div>
+      <div class="grid grid-3-always">
+        <div class="stat"><div class="value" id="alertLow">0</div><div class="label">Low stock</div></div>
+        <div class="stat"><div class="value" id="alertOut">0</div><div class="label">Out of stock</div></div>
+        <div class="stat"><div class="value" id="alertExpired">0</div><div class="label">Expired</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Medicine</th><th>Quantity</th><th>Expiry date</th><th>Status</th></tr></thead>
+          <tbody id="alertsBody"></tbody>
+        </table>
+      </div>
+      <p><a class="btn btn-outline" href="admin-medicines.html">Manage medicines</a></p>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
