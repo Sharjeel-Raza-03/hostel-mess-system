@@ -1,0 +1,22 @@
+# systemd service for the Spring Boot backend.
+# Installed by setup-server.sh as /etc/systemd/system/hostel-backend.service
+# The secrets are read from /etc/hostel-mess/backend.env (never from this file).
+
+[Unit]
+Description=Hostel Mess System backend (Spring Boot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=hostel
+Group=hostel
+WorkingDirectory=/opt/hostel-mess
+EnvironmentFile=/etc/hostel-mess/backend.env
+ExecStart=/usr/bin/java -Xms128m -Xmx384m -jar /opt/hostel-mess/hostel-mess.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

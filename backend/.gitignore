@@ -18,7 +18,9 @@ target/
 *.iws
 *.iml
 *.ipr
+*.pem
 set-env.bat
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
