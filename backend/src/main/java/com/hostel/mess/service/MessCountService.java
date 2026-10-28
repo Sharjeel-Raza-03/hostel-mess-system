@@ -19,9 +19,17 @@ public class MessCountService {
     private final MealRecordRepository mealRepository;
     private final DailyMessCountRepository countRepository;
 
-    /** Recounts the meals for a date (ignoring students on leave) and saves the result. */
+    /**
+     * Recounts the meals for a date (ignoring students on leave) and saves the result.
+     * The count row is created if missing and locked, so concurrent requests cannot
+     * overwrite each other or insert the same date twice.
+     */
     @Transactional
     public DailyMessCount recalculate(LocalDate date) {
+        countRepository.ensureRow(date);
+        DailyMessCount count = countRepository.findForUpdate(date)
+                .orElseThrow(() -> new IllegalStateException("Mess count row missing for " + date));
+
         List<MealRecord> records = mealRepository.findByMealDate(date);
         int breakfast = 0;
         int lunch = 0;
@@ -35,8 +43,6 @@ public class MessCountService {
             if (r.isDinner()) dinner++;
         }
 
-        DailyMessCount count = countRepository.findByCountDate(date)
-                .orElseGet(() -> DailyMessCount.builder().countDate(date).build());
         count.setBreakfastCount(breakfast);
         count.setLunchCount(lunch);
         count.setDinnerCount(dinner);
